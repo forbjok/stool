@@ -1,3 +1,4 @@
+pub mod event;
 pub mod ui;
 
 use std::{
@@ -14,6 +15,7 @@ use std::{
 };
 
 use anyhow::Context;
+use event::EngineEvent;
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use time::{format_description::BorrowedFormatItem, macros::format_description, OffsetDateTime};
@@ -156,6 +158,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
 
     let autobackup = Arc::new(AtomicBool::new(true));
     let (backup_tx, backup_rx) = std::sync::mpsc::channel::<BackupRequest>();
+    let (event_tx, event_rx) = std::sync::mpsc::channel::<EngineEvent>();
 
     let save_paths: Vec<InternalGameSavePath> = gcfg
         .save_paths
