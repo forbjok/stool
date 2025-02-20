@@ -284,15 +284,18 @@ impl Widget for &mut App<'_> {
             .centered()
             .render(autobackup_area, buf);
 
-        if let Some(action) = self.state.lock().unwrap().current_action.as_ref() {
-            Gauge::default()
-                .gauge_style(PROGRESS_BAR_STYLE)
-                .bg(PROGRESS_BAR_BG_COLOR)
-                .label(action.describe())
-                .ratio(action.progress.get() as f64)
-                .render(action_area, buf);
-        } else {
-            Line::raw("Idle").centered().render(action_area, buf);
+        match self.state.lock().unwrap().current_action.as_ref() {
+            Some(action) => {
+                Gauge::default()
+                    .gauge_style(PROGRESS_BAR_STYLE)
+                    .bg(PROGRESS_BAR_BG_COLOR)
+                    .label(action.describe())
+                    .ratio(action.progress.get() as f64)
+                    .render(action_area, buf);
+            }
+            _ => {
+                Line::raw("Idle").centered().render(action_area, buf);
+            }
         };
     }
 }
