@@ -1,7 +1,7 @@
 use ratatui::{
     style::{
-        palette::tailwind::{BLUE, GREEN, PINK, RED, YELLOW},
         Style,
+        palette::tailwind::{BLUE, GREEN, PINK, RED, YELLOW},
     },
     symbols,
     text::Line,

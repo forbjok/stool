@@ -2,8 +2,8 @@ use std::{
     env,
     process::Stdio,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
     },
     time::Duration,
 };

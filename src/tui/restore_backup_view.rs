@@ -10,7 +10,7 @@ use ratatui::{
 
 use crate::engine::{BackupRequest, EngineControl};
 
-use super::style::{list_item_color, LIST_BORDER_COLOR, LIST_HIGHLIGHT_STYLE};
+use super::style::{LIST_BORDER_COLOR, LIST_HIGHLIGHT_STYLE, list_item_color};
 
 pub struct RestoreBackupView {
     engine_control: EngineControl,

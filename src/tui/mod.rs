@@ -7,7 +7,7 @@ mod state;
 mod style;
 mod uihandler;
 
-use std::sync::{atomic::AtomicBool, Arc, Mutex};
+use std::sync::{Arc, Mutex, atomic::AtomicBool};
 
 pub use state::AppState;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};

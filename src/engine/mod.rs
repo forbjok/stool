@@ -5,9 +5,9 @@ use std::{
     path::{Path, PathBuf},
     process::Stdio,
     sync::{
+        Arc, Mutex, Weak,
         atomic::{AtomicBool, AtomicU8, Ordering},
         mpsc::Sender,
-        Arc, Mutex, Weak,
     },
     thread::JoinHandle,
     time::{Duration, Instant},
@@ -16,7 +16,7 @@ use std::{
 use anyhow::Context;
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use time::{format_description::BorrowedFormatItem, macros::format_description, OffsetDateTime};
+use time::{OffsetDateTime, format_description::BorrowedFormatItem, macros::format_description};
 use tracing::{error, info, warn};
 use ui::StoolUiHandler;
 
@@ -464,59 +464,61 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
 
         let mut last_autobackup_at: Option<Instant> = None;
 
-        std::thread::spawn(move || loop {
-            if shutdown.load(Ordering::Relaxed) {
-                break;
-            }
+        std::thread::spawn(move || {
+            loop {
+                if shutdown.load(Ordering::Relaxed) {
+                    break;
+                }
 
-            std::thread::sleep(Duration::from_secs(1));
+                std::thread::sleep(Duration::from_secs(1));
 
-            if !autobackup.load(Ordering::Acquire) || backup_or_restore_ongoing.load(Ordering::Acquire) {
-                continue;
-            }
+                if !autobackup.load(Ordering::Acquire) || backup_or_restore_ongoing.load(Ordering::Acquire) {
+                    continue;
+                }
 
-            let now = Instant::now();
+                let now = Instant::now();
 
-            {
-                let last_backup_at = last_backup_at.lock().unwrap();
+                {
+                    let last_backup_at = last_backup_at.lock().unwrap();
 
-                // If no backup has been created since the last autobackup was created,
-                // do not request another. It's likely still waiting for grace time.
-                if let Some(last_autobackup_at) = last_autobackup_at {
-                    let Some(last_backup_at) = *last_backup_at else {
+                    // If no backup has been created since the last autobackup was created,
+                    // do not request another. It's likely still waiting for grace time.
+                    if let Some(last_autobackup_at) = last_autobackup_at {
+                        let Some(last_backup_at) = *last_backup_at else {
+                            continue;
+                        };
+
+                        if last_backup_at < last_autobackup_at {
+                            continue;
+                        }
+                    }
+
+                    let last_change_at = last_change_at.lock().unwrap();
+
+                    let Some(last_change_at) = *last_change_at else {
                         continue;
                     };
 
-                    if last_backup_at < last_autobackup_at {
-                        continue;
+                    if let Some(last_autobackup_at) = last_autobackup_at {
+                        if last_autobackup_at >= last_change_at {
+                            continue;
+                        }
+                    }
+
+                    if let Some(last_backup_at) = *last_backup_at {
+                        if now < (last_backup_at + min_interval) {
+                            continue;
+                        }
                     }
                 }
 
-                let last_change_at = last_change_at.lock().unwrap();
+                last_autobackup_at = Some(now);
 
-                let Some(last_change_at) = *last_change_at else {
-                    continue;
-                };
+                info!("Creating auto-backup");
 
-                if let Some(last_autobackup_at) = last_autobackup_at {
-                    if last_autobackup_at >= last_change_at {
-                        continue;
-                    }
-                }
-
-                if let Some(last_backup_at) = *last_backup_at {
-                    if now < (last_backup_at + min_interval) {
-                        continue;
-                    }
-                }
+                let archive_name = make_backup_filename("Auto");
+                backup_tx.send(BackupRequest::CreateBackup { archive_name }).unwrap();
             }
-
-            last_autobackup_at = Some(now);
-
-            info!("Creating auto-backup");
-
-            let archive_name = make_backup_filename("Auto");
-            backup_tx.send(BackupRequest::CreateBackup { archive_name }).unwrap();
         })
     };
 

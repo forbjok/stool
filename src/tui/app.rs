@@ -1,20 +1,20 @@
 use std::{
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
     },
     time::Duration,
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
+    DefaultTerminal,
     layout::{Constraint, Layout},
     style::Stylize,
     symbols,
     text::Line,
     widgets::{Block, Borders, Gauge, Padding, Paragraph, Widget},
-    DefaultTerminal,
 };
 
 use crate::engine::{Engine, EngineControl};

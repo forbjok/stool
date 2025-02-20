@@ -1,6 +1,6 @@
 use ratatui::style::{
-    palette::tailwind::{BLACK, BLUE, GREEN, RED, SLATE},
     Color, Style,
+    palette::tailwind::{BLACK, BLUE, GREEN, RED, SLATE},
 };
 
 pub const HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(BLUE.c800);
@@ -21,9 +21,5 @@ pub const FOOTER_AUTOBACKUP_ON_STYLE: Style = Style::new().bg(GREEN.c900);
 pub const FOOTER_AUTOBACKUP_OFF_STYLE: Style = Style::new().bg(RED.c900);
 
 pub const fn list_item_color(i: usize) -> Color {
-    if i % 2 == 0 {
-        LIST_ITEM_BG
-    } else {
-        LIST_ITEM_ALT_BG
-    }
+    if i % 2 == 0 { LIST_ITEM_BG } else { LIST_ITEM_ALT_BG }
 }
