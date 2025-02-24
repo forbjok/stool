@@ -424,6 +424,10 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
 
                             let now = Instant::now();
 
+                            // Store path to latest backup archive
+                            let mut latest_backup_path = latest_backup_path.lock().unwrap();
+                            *latest_backup_path = Some(archive_path);
+
                             // Clear change tracker, to avoid restore triggering automatic backup
                             let mut last_change_at = last_change_at.lock().unwrap();
                             *last_change_at = None;
