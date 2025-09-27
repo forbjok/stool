@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-use crossterm::event::{KeyCode, KeyEvent};
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     style::Stylize,
     symbols,

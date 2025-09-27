@@ -1,4 +1,4 @@
-use crossterm::event::{KeyCode, KeyEvent};
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     layout::{Constraint, Layout},
     widgets::{Block, HighlightSpacing, List, ListItem, ListState, Padding, StatefulWidget, Widget},

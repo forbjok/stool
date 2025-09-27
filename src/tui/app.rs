@@ -7,7 +7,7 @@ use std::{
     time::Duration,
 };
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     DefaultTerminal,
     layout::{Constraint, Layout},
@@ -116,7 +116,7 @@ impl App<'_> {
 
             terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
 
-            if crossterm::event::poll(EVENT_POLL_DURATION)? {
+            if ratatui::crossterm::event::poll(EVENT_POLL_DURATION)? {
                 self.handle_crossterm_events()?;
             };
         }

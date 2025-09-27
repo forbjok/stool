@@ -29,7 +29,7 @@ pub fn run(engine: Engine, app_state: Arc<Mutex<AppState>>, shutdown: Arc<Atomic
     tui_logger::set_default_level(tui_logger::LevelFilter::Info);
 
     tracing_subscriber::registry()
-        .with(tui_logger::tracing_subscriber_layer())
+        .with(tui_logger::TuiTracingSubscriberLayer)
         .init();
 
     let terminal = ratatui::init();
