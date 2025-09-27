@@ -218,10 +218,10 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
 
                                     let mut last_change_at = last_change_at.lock().unwrap();
 
-                                    if let Some(time_since_last_change) = last_change_at.map(|lca| now - lca) {
-                                        if time_since_last_change < grace_time {
-                                            break 'gtl grace_time - time_since_last_change;
-                                        }
+                                    if let Some(time_since_last_change) = last_change_at.map(|lca| now - lca)
+                                        && time_since_last_change < grace_time
+                                    {
+                                        break 'gtl grace_time - time_since_last_change;
                                     }
 
                                     *last_change_at = None;
@@ -503,16 +503,16 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                         continue;
                     };
 
-                    if let Some(last_autobackup_at) = last_autobackup_at {
-                        if last_autobackup_at >= last_change_at {
-                            continue;
-                        }
+                    if let Some(last_autobackup_at) = last_autobackup_at
+                        && last_autobackup_at >= last_change_at
+                    {
+                        continue;
                     }
 
-                    if let Some(last_backup_at) = *last_backup_at {
-                        if now < (last_backup_at + min_interval) {
-                            continue;
-                        }
+                    if let Some(last_backup_at) = *last_backup_at
+                        && now < (last_backup_at + min_interval)
+                    {
+                        continue;
                     }
                 }
 
@@ -580,16 +580,16 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                                         continue;
                                     };
 
-                                    if let Some(include_globset) = include_globset {
-                                        if !include_globset.is_match(rel_path) {
-                                            continue;
-                                        }
+                                    if let Some(include_globset) = include_globset
+                                        && !include_globset.is_match(rel_path)
+                                    {
+                                        continue;
                                     }
 
-                                    if let Some(ignore_globset) = ignore_globset {
-                                        if ignore_globset.is_match(rel_path) {
-                                            continue;
-                                        }
+                                    if let Some(ignore_globset) = ignore_globset
+                                        && ignore_globset.is_match(rel_path)
+                                    {
+                                        continue;
                                     }
 
                                     break 'ignore;
@@ -645,10 +645,10 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                     break 'exit_backup;
                 };
 
-                if let Some(last_backup_at) = *last_backup_at {
-                    if last_backup_at > last_change_at {
-                        break 'exit_backup;
-                    }
+                if let Some(last_backup_at) = *last_backup_at
+                    && last_backup_at > last_change_at
+                {
+                    break 'exit_backup;
                 }
 
                 info!("Creating exit backup...");

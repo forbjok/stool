@@ -88,16 +88,16 @@ impl SyncDir {
                 continue;
             }
 
-            if let Some(include_globset) = include_globset {
-                if !include_globset.is_match(&rel_path) {
-                    continue;
-                }
+            if let Some(include_globset) = include_globset
+                && !include_globset.is_match(&rel_path)
+            {
+                continue;
             }
 
-            if let Some(ignore_globset) = ignore_globset {
-                if ignore_globset.is_match(&rel_path) {
-                    continue;
-                }
+            if let Some(ignore_globset) = ignore_globset
+                && ignore_globset.is_match(&rel_path)
+            {
+                continue;
             }
 
             files.insert(rel_path);
