@@ -7,6 +7,8 @@ use std::str::FromStr;
 use anyhow::Context;
 use serde_derive::{Deserialize, Serialize};
 
+use super::Command;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct GameSaveDir {
@@ -29,6 +31,15 @@ pub struct AutoBackup {
     pub min_interval: u64,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct GameCustomAction {
+    pub on_before_backup: Option<Command>,
+    pub on_after_backup: Option<Command>,
+    pub on_before_restore: Option<Command>,
+    pub on_after_restore: Option<Command>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct GameConfig {
@@ -42,6 +53,10 @@ pub struct GameConfig {
     #[serde(default)]
     #[serde(rename = "save-file")]
     pub save_files: Vec<GameSaveFile>,
+
+    #[serde(default)]
+    #[serde(rename = "custom-action")]
+    pub custom_actions: Vec<GameCustomAction>,
 }
 
 impl GameConfig {

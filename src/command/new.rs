@@ -88,6 +88,8 @@ pub fn new(game_config_path: &Path) -> Result<(), anyhow::Error> {
 
         save_dirs,
         save_files,
+
+        custom_actions: Default::default(),
     };
 
     fs::create_dir_all(game_config_path)?;

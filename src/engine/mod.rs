@@ -1,6 +1,7 @@
 pub mod ui;
 
 use std::{
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
     process::Stdio,
@@ -13,6 +14,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crate::config as cfg;
 use anyhow::Context;
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -136,7 +138,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
     let file_path = game_config_path.join(&file_name);
 
     // Read game config
-    let gcfg = crate::config::game::GameConfig::from_file(&file_path)?;
+    let gcfg = cfg::game::GameConfig::from_file(&file_path)?;
 
     let output_path = data_path.join(name);
 
@@ -186,6 +188,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
         let save_dirs = save_dirs.clone();
         let save_files = gcfg.save_files.clone();
 
+        let data_path = data_path.to_owned();
         let staging_path = staging_path.to_owned();
         let backup_path = backup_path.to_owned();
 
@@ -195,6 +198,23 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
         let last_backup_at = last_backup_at.clone();
         let last_change_at = last_change_at.clone();
         let latest_backup_path = latest_backup_path.clone();
+
+        let mut custom_action_env_vars: HashMap<String, String> = HashMap::new();
+        custom_action_env_vars.insert("STOOL_GAME_NAME".to_owned(), args.name.to_owned());
+        custom_action_env_vars.insert(
+            "STOOL_DATA_PATH".to_owned(),
+            data_path
+                .to_str()
+                .context("Error converting data path to string")?
+                .to_owned(),
+        );
+        custom_action_env_vars.insert(
+            "STOOL_BACKUP_PATH".to_owned(),
+            backup_path
+                .to_str()
+                .context("Error converting backup path to string")?
+                .to_owned(),
+        );
 
         std::thread::spawn(move || {
             for backup_request in &backup_rx {
@@ -237,6 +257,19 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                             }
 
                             ui.begin_backup(&archive_name);
+
+                            // Run before-backup custom actions
+                            run_game_custom_actions(
+                                &gcfg.custom_actions,
+                                |ca| ca.on_before_backup.as_ref(),
+                                || {
+                                    let mut env_vars = custom_action_env_vars.clone();
+                                    env_vars.insert("STOOL_BACKUP_ARCHIVE_NAME".to_owned(), archive_name.to_owned());
+
+                                    env_vars
+                                },
+                                &data_path,
+                            )?;
 
                             let now = Instant::now();
 
@@ -329,6 +362,19 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                             // Store path to latest backup archive
                             let mut latest_backup_path = latest_backup_path.lock().unwrap();
                             *latest_backup_path = Some(archive_path);
+
+                            // Run after-backup custom actions
+                            run_game_custom_actions(
+                                &gcfg.custom_actions,
+                                |ca| ca.on_after_backup.as_ref(),
+                                || {
+                                    let mut env_vars = custom_action_env_vars.clone();
+                                    env_vars.insert("STOOL_BACKUP_ARCHIVE_NAME".to_owned(), archive_name.to_owned());
+
+                                    env_vars
+                                },
+                                &data_path,
+                            )?;
                         }
                         BackupRequest::RestoreBackup { archive_name } => {
                             let archive_path = backup_path.join(&archive_name);
@@ -339,6 +385,19 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                             }
 
                             ui.begin_restore(&archive_name);
+
+                            // Run before-restore custom actions
+                            run_game_custom_actions(
+                                &gcfg.custom_actions,
+                                |ca| ca.on_before_restore.as_ref(),
+                                || {
+                                    let mut env_vars = custom_action_env_vars.clone();
+                                    env_vars.insert("STOOL_BACKUP_ARCHIVE_NAME".to_owned(), archive_name.to_owned());
+
+                                    env_vars
+                                },
+                                &data_path,
+                            )?;
 
                             // Remove staging directory if it exists
                             if staging_path.exists() {
@@ -435,6 +494,19 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                             // Set last backup timestamp to now, to prevent autobackup immediately after restore
                             let mut last_backup_at = last_backup_at.lock().unwrap();
                             *last_backup_at = Some(now);
+
+                            // Run after-restore custom actions
+                            run_game_custom_actions(
+                                &gcfg.custom_actions,
+                                |ca| ca.on_after_restore.as_ref(),
+                                || {
+                                    let mut env_vars = custom_action_env_vars.clone();
+                                    env_vars.insert("STOOL_BACKUP_ARCHIVE_NAME".to_owned(), archive_name.to_owned());
+
+                                    env_vars
+                                },
+                                &data_path,
+                            )?;
                         }
                     }
 
@@ -730,6 +802,41 @@ fn unpack_archive(archive_path: &Path, dst: &Path) -> Result<(), anyhow::Error> 
         .arg(archive_path)
         .stdout(Stdio::null())
         .status()?;
+
+    Ok(())
+}
+
+fn run_command(cmd: &cfg::Command, current_dir: &Path, env_vars: &HashMap<String, String>) -> anyhow::Result<()> {
+    let (program, args) = cmd.0.split_first().context("Couldn't split command")?;
+
+    std::process::Command::new(program)
+        .current_dir(current_dir)
+        .args(args)
+        .envs(env_vars)
+        .status()?;
+
+    Ok(())
+}
+
+fn run_game_custom_actions<FGC, FBEV>(
+    custom_actions: &[cfg::game::GameCustomAction],
+    get_command_fn: FGC,
+    build_env_vars_fn: FBEV,
+    current_dir: &Path,
+) -> anyhow::Result<()>
+where
+    FGC: Fn(&cfg::game::GameCustomAction) -> Option<&cfg::Command>,
+    FBEV: Fn() -> HashMap<String, String>,
+{
+    let commands: Vec<_> = custom_actions.iter().filter_map(get_command_fn).collect();
+
+    if !commands.is_empty() {
+        let env_vars = build_env_vars_fn();
+
+        for cmd in commands {
+            run_command(cmd, current_dir, &env_vars)?;
+        }
+    }
 
     Ok(())
 }
