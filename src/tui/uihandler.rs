@@ -27,7 +27,7 @@ impl TuiUiHandler {
 }
 
 impl StoolUiHandler for TuiUiHandler {
-    fn clear(self) -> Result<(), anyhow::Error> {
+    fn clear(self) -> anyhow::Result<()> {
         Ok(())
     }
 

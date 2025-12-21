@@ -17,7 +17,7 @@ use crate::engine::{Engine, EngineArgs};
 
 use self::app::App;
 
-pub fn run(engine: Engine, app_state: Arc<Mutex<AppState>>, shutdown: Arc<AtomicBool>) -> Result<(), anyhow::Error> {
+pub fn run(engine: Engine, app_state: Arc<Mutex<AppState>>, shutdown: Arc<AtomicBool>) -> anyhow::Result<()> {
     let backup_path = {
         let EngineArgs { name, data_path, .. } = engine.args();
 

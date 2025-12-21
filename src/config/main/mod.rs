@@ -17,7 +17,7 @@ pub struct MainConfig {
 }
 
 impl MainConfig {
-    pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
+    pub fn from_file(path: &Path) -> anyhow::Result<Self> {
         use std::io::Read;
 
         let mut file = fs::File::open(path).context("Error opening config file")?;
@@ -29,7 +29,7 @@ impl MainConfig {
         Self::from_str(&toml_str)
     }
 
-    pub fn write(&self, path: &Path) -> Result<(), anyhow::Error> {
+    pub fn write(&self, path: &Path) -> anyhow::Result<()> {
         let toml_str = toml::to_string_pretty(self)?;
 
         // Write to file.
@@ -40,13 +40,13 @@ impl MainConfig {
         Ok(())
     }
 
-    fn path_from_location(path: &Path) -> Result<PathBuf, anyhow::Error> {
+    fn path_from_location(path: &Path) -> anyhow::Result<PathBuf> {
         Ok(path.join(CONFIG_FILENAME))
     }
 
     /// Load configuration from default location,
     /// creating it if it is missing.
-    pub fn load_or_write_default_from_location(config_location: &Path) -> Result<Self, anyhow::Error> {
+    pub fn load_or_write_default_from_location(config_location: &Path) -> anyhow::Result<Self> {
         let config_file_path = Self::path_from_location(config_location)?;
 
         if config_file_path.exists() {

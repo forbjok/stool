@@ -19,7 +19,7 @@ use crate::{
 const STOOL_PASSTHROUGH_PREFIX: &str = "STOOL_PASSTHROUGH_";
 const WAIT_SLEEP_DURATION: Duration = Duration::from_secs(1);
 
-pub fn rungame(engine_args: EngineArgs, game_command: Vec<String>) -> Result<(), anyhow::Error> {
+pub fn rungame(engine_args: EngineArgs, game_command: Vec<String>) -> anyhow::Result<()> {
     // Shutdown signal
     let shutdown = Arc::new(AtomicBool::new(false));
 
@@ -69,7 +69,7 @@ pub fn rungame(engine_args: EngineArgs, game_command: Vec<String>) -> Result<(),
                 .unwrap_or(true)
         });
 
-        std::thread::spawn(move || -> Result<(), anyhow::Error> {
+        std::thread::spawn(move || -> anyhow::Result<()> {
             let (program, args) = game_command.split_first().context("Couldn't split game command")?;
 
             // Run game

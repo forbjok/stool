@@ -1,4 +1,4 @@
-pub fn build_globset(glob_strings: &[String]) -> Result<globset::GlobSet, anyhow::Error> {
+pub fn build_globset(glob_strings: &[String]) -> anyhow::Result<globset::GlobSet> {
     let mut builder = globset::GlobSetBuilder::new();
 
     for glob_str in glob_strings.iter() {

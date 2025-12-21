@@ -45,7 +45,7 @@ pub struct GameConfig {
 }
 
 impl GameConfig {
-    pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
+    pub fn from_file(path: &Path) -> anyhow::Result<Self> {
         use std::io::Read;
 
         let mut file = fs::File::open(path).context("Error opening config file")?;
@@ -57,7 +57,7 @@ impl GameConfig {
         Self::from_str(&toml_str)
     }
 
-    pub fn write(&self, path: &Path) -> Result<(), anyhow::Error> {
+    pub fn write(&self, path: &Path) -> anyhow::Result<()> {
         let toml_str = toml::to_string_pretty(self)?;
 
         // Write to file.

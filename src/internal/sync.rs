@@ -70,7 +70,7 @@ impl SyncDir {
         include_globset: Option<&globset::GlobSet>,
         ignore_globset: Option<&globset::GlobSet>,
         ui: &mut dyn SyncUiHandler,
-    ) -> Result<Self, anyhow::Error> {
+    ) -> anyhow::Result<Self> {
         let path = path.canonicalize()?;
         let mut dirs: HashSet<PathBuf> = HashSet::new();
         let mut files: HashSet<PathBuf> = HashSet::new();
@@ -108,7 +108,7 @@ impl SyncDir {
         Ok(Self { path, dirs, files })
     }
 
-    pub fn sync_from(&self, other: &Self, ui: &mut dyn SyncUiHandler) -> Result<SyncJob, anyhow::Error> {
+    pub fn sync_from(&self, other: &Self, ui: &mut dyn SyncUiHandler) -> anyhow::Result<SyncJob> {
         let src = other;
         let dst = self;
 
@@ -302,7 +302,7 @@ pub fn sync_dir(
     ignore_globset: Option<&globset::GlobSet>,
     filter_in_dst: bool,
     ui: &mut dyn SyncUiHandler,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     // Create destination directory if it does not exist
     if !dst.exists() {
         fs::create_dir_all(dst)?;
@@ -348,7 +348,7 @@ pub fn sync_dir(
     Ok(())
 }
 
-pub fn sync_file(src_file_path: &Path, dst: &Path, ui: &mut dyn SyncUiHandler) -> Result<(), anyhow::Error> {
+pub fn sync_file(src_file_path: &Path, dst: &Path, ui: &mut dyn SyncUiHandler) -> anyhow::Result<()> {
     let src_dir_path = src_file_path
         .parent()
         .context("Error getting parent directory of source file")?;

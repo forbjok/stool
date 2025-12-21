@@ -6,7 +6,7 @@ use std::{
 
 use crate::config::game::{AutoBackup, GameConfig, GameSaveDir, GameSaveFile};
 
-pub fn new(game_config_path: &Path) -> Result<(), anyhow::Error> {
+pub fn new(game_config_path: &Path) -> anyhow::Result<()> {
     let name: String = dialoguer::Input::new().with_prompt("Name").interact_text()?;
     let file_name = format!("{name}.toml");
     let file_path = game_config_path.join(&file_name);

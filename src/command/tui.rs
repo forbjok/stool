@@ -10,7 +10,7 @@ use crate::{
     tui::{AppState, TuiUiHandler},
 };
 
-pub fn tui(engine_args: EngineArgs) -> Result<(), anyhow::Error> {
+pub fn tui(engine_args: EngineArgs) -> anyhow::Result<()> {
     // Shutdown signal
     let shutdown = Arc::new(AtomicBool::new(false));
 

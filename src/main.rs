@@ -34,7 +34,7 @@ enum Command {
     },
 }
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() -> anyhow::Result<()> {
     let opt = Opt::parse();
 
     let config_path = self::config::main::get_default_config_path().context("Getting default config path")?;

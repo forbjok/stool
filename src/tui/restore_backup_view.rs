@@ -21,7 +21,7 @@ pub struct RestoreBackupView {
 }
 
 impl RestoreBackupView {
-    pub fn new(engine_control: EngineControl, backup_path: &Path) -> Result<Self, anyhow::Error> {
+    pub fn new(engine_control: EngineControl, backup_path: &Path) -> anyhow::Result<Self> {
         let backup_files = fs::read_dir(backup_path)?;
         let mut backup_files: Vec<_> = backup_files
             .filter_map(Result::ok)
@@ -55,7 +55,7 @@ impl RestoreBackupView {
         })
     }
 
-    pub fn on_key_event(&mut self, event: KeyEvent) -> Result<(), anyhow::Error> {
+    pub fn on_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
         match event.code {
             KeyCode::Esc => self.is_done = true,
             KeyCode::Down => self.list_state.select_next(),
@@ -83,7 +83,7 @@ impl RestoreBackupView {
         self.is_done
     }
 
-    pub fn restore_backup(&mut self, archive_name: String) -> Result<(), anyhow::Error> {
+    pub fn restore_backup(&mut self, archive_name: String) -> anyhow::Result<()> {
         if self.is_done {
             return Ok(());
         }

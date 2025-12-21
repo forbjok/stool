@@ -114,7 +114,7 @@ impl EngineControl {
     }
 
     /// Request a backup operation
-    pub fn send(&self, req: BackupRequest) -> Result<(), anyhow::Error> {
+    pub fn send(&self, req: BackupRequest) -> anyhow::Result<()> {
         let Some(backup_tx) = self.backup_tx.upgrade() else {
             return Ok(());
         };
@@ -125,7 +125,7 @@ impl EngineControl {
     }
 }
 
-pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHandler) -> Result<Engine, anyhow::Error> {
+pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHandler) -> anyhow::Result<Engine> {
     let EngineArgs {
         name,
         game_config_path,
@@ -201,7 +201,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
                 // Pause autobackup while executing a request
                 backup_or_restore_ongoing.store(true, Ordering::Release);
 
-                let res: Result<(), anyhow::Error> = (|| {
+                let res: anyhow::Result<()> = (|| {
                     match backup_request {
                         BackupRequest::CreateBackup { archive_name } => {
                             // Wait for grace time to elapse.
@@ -711,7 +711,7 @@ pub fn make_backup_filename(description: &str) -> String {
     format!("{} {description}.7z", now.format(ARCHIVE_DATE_FORMAT).unwrap())
 }
 
-fn create_archive(src: &Path, archive_path: &Path) -> Result<(), anyhow::Error> {
+fn create_archive(src: &Path, archive_path: &Path) -> anyhow::Result<()> {
     std::process::Command::new("7z")
         .current_dir(src)
         .args(["a", "-mx9"])
@@ -723,7 +723,7 @@ fn create_archive(src: &Path, archive_path: &Path) -> Result<(), anyhow::Error> 
     Ok(())
 }
 
-fn unpack_archive(archive_path: &Path, dst: &Path) -> Result<(), anyhow::Error> {
+fn unpack_archive(archive_path: &Path, dst: &Path) -> anyhow::Result<()> {
     std::process::Command::new("7z")
         .current_dir(dst)
         .arg("x")

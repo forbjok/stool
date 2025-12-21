@@ -38,7 +38,7 @@ impl CreateBackupView<'_> {
         }
     }
 
-    pub fn on_key_event(&mut self, event: KeyEvent) -> Result<(), anyhow::Error> {
+    pub fn on_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
         match event.code {
             KeyCode::Esc => self.is_done = true,
             KeyCode::Enter => {
@@ -58,7 +58,7 @@ impl CreateBackupView<'_> {
         self.is_done
     }
 
-    pub fn create_backup(&mut self) -> Result<(), anyhow::Error> {
+    pub fn create_backup(&mut self) -> anyhow::Result<()> {
         if self.is_done {
             return Ok(());
         }

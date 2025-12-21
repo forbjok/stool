@@ -93,7 +93,7 @@ impl App<'_> {
     }
 
     /// Run the application's main loop.
-    pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<(), anyhow::Error> {
+    pub fn run(mut self, mut terminal: DefaultTerminal) -> anyhow::Result<()> {
         let mut shutting_down = false;
 
         loop {
@@ -128,7 +128,7 @@ impl App<'_> {
     }
 
     /// Reads the crossterm events and updates the state of [`App`].
-    fn handle_crossterm_events(&mut self) -> Result<(), anyhow::Error> {
+    fn handle_crossterm_events(&mut self) -> anyhow::Result<()> {
         if !event::poll(EVENT_POLL_DURATION)? {
             return Ok(());
         }
@@ -145,7 +145,7 @@ impl App<'_> {
     }
 
     /// Handles the key events and updates the state of [`App`].
-    fn on_key_event(&mut self, key: KeyEvent) -> Result<(), anyhow::Error> {
+    fn on_key_event(&mut self, key: KeyEvent) -> anyhow::Result<()> {
         'view: {
             match self.view {
                 View::CreateBackup => {
@@ -208,7 +208,7 @@ impl App<'_> {
     }
 
     /// Create views if needed
-    fn create_views(&mut self) -> Result<(), anyhow::Error> {
+    fn create_views(&mut self) -> anyhow::Result<()> {
         if self.view == View::CreateBackup && self.create_backup_view.is_none() {
             self.create_backup_view = Some(CreateBackupView::new(self.engine_control.clone()));
         }

@@ -1,7 +1,7 @@
 use crate::internal::sync::SyncUiHandler;
 
 pub trait StoolUiHandler: SyncUiHandler + 'static + Send {
-    fn clear(self) -> Result<(), anyhow::Error>;
+    fn clear(self) -> anyhow::Result<()>;
 
     fn begin_backup(&mut self, name: &str);
     fn end_backup(&mut self, success: bool);
