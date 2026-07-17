@@ -2,6 +2,7 @@ mod command;
 mod config;
 mod engine;
 mod internal;
+#[cfg(feature = "tui")]
 mod tui;
 
 use anyhow::Context;
@@ -19,6 +20,7 @@ struct Opt {
 enum Command {
     #[clap(about = "Create a new game config")]
     New,
+    #[cfg(feature = "tui")]
     #[clap(about = "Run game via stool")]
     RunGame {
         #[clap(help = "Game name")]
@@ -27,6 +29,7 @@ enum Command {
         #[clap(help = "Game command")]
         game_command: Vec<String>,
     },
+    #[cfg(feature = "tui")]
     #[clap(about = "Run stool in TUI mode")]
     Tui {
         #[clap(help = "Game name")]
@@ -51,6 +54,7 @@ fn main() -> anyhow::Result<()> {
 
     match opt.command {
         Command::New => command::new(&game_config_path),
+        #[cfg(feature = "tui")]
         Command::RunGame { name, game_command } => {
             let engine_args = EngineArgs {
                 name,
@@ -59,6 +63,7 @@ fn main() -> anyhow::Result<()> {
             };
             command::rungame(engine_args, game_command)
         }
+        #[cfg(feature = "tui")]
         Command::Tui { name } => {
             let engine_args = EngineArgs {
                 name,
