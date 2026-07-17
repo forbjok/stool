@@ -46,6 +46,7 @@ pub struct EngineArgs {
     pub name: String,
     pub game_config_path: PathBuf,
     pub data_path: PathBuf,
+    pub autobackup: Option<bool>,
 }
 
 /// Represents a running instance of an S-Tool engine.
@@ -130,6 +131,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
         name,
         game_config_path,
         data_path,
+        autobackup,
     } = &args;
 
     let file_name = format!("{name}.toml");
@@ -159,7 +161,7 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
 
     let backup_or_restore_ongoing = Arc::new(AtomicBool::new(false));
 
-    let autobackup = Arc::new(AtomicBool::new(gcfg.auto_backup.enabled));
+    let autobackup = Arc::new(AtomicBool::new(autobackup.unwrap_or(gcfg.auto_backup.enabled)));
     let (backup_tx, backup_rx) = std::sync::mpsc::channel::<BackupRequest>();
 
     let save_dirs: Vec<InternalGameSaveDir> = gcfg

@@ -26,11 +26,17 @@ enum Command {
 
         #[clap(help = "Game command")]
         game_command: Vec<String>,
+
+        #[clap(long, help = "Override autobackup")]
+        autobackup: Option<bool>,
     },
     #[clap(about = "Run stool in TUI mode")]
     Tui {
         #[clap(help = "Game name")]
         name: String,
+
+        #[clap(long, help = "Override autobackup")]
+        autobackup: Option<bool>,
     },
     #[clap(about = "Run stool in watch mode")]
     Watch {
@@ -51,19 +57,25 @@ fn main() -> anyhow::Result<()> {
 
     match opt.command {
         Command::New => command::new(&game_config_path),
-        Command::RunGame { name, game_command } => {
+        Command::RunGame {
+            name,
+            game_command,
+            autobackup,
+        } => {
             let engine_args = EngineArgs {
                 name,
                 game_config_path,
                 data_path,
+                autobackup,
             };
             command::rungame(engine_args, game_command)
         }
-        Command::Tui { name } => {
+        Command::Tui { name, autobackup } => {
             let engine_args = EngineArgs {
                 name,
                 game_config_path,
                 data_path,
+                autobackup,
             };
 
             command::tui(engine_args)
@@ -73,6 +85,7 @@ fn main() -> anyhow::Result<()> {
                 name,
                 game_config_path,
                 data_path,
+                autobackup: Some(true),
             };
 
             command::watch(engine_args)
