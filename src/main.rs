@@ -32,6 +32,11 @@ enum Command {
         #[clap(help = "Game name")]
         name: String,
     },
+    #[clap(about = "Run stool in watch mode")]
+    Watch {
+        #[clap(help = "Game name")]
+        name: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -62,6 +67,15 @@ fn main() -> anyhow::Result<()> {
             };
 
             command::tui(engine_args)
+        }
+        Command::Watch { name } => {
+            let engine_args = EngineArgs {
+                name,
+                game_config_path,
+                data_path,
+            };
+
+            command::watch(engine_args)
         }
     }?;
 
