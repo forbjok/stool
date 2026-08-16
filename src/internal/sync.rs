@@ -80,10 +80,10 @@ impl SyncDir {
         let entries = walkdir::WalkDir::new(&path).into_iter().filter_map(Result::ok);
 
         for entry in entries {
-            let is_file = entry.file_type().is_file();
+            let is_dir = entry.file_type().is_dir();
             let rel_path = entry.into_path().strip_prefix(&path)?.to_path_buf();
 
-            if !is_file {
+            if is_dir {
                 dirs.insert(rel_path);
                 continue;
             }

@@ -35,12 +35,7 @@ pub fn new(game_config_path: &Path) -> anyhow::Result<()> {
 
         let path: PathBuf = path.into();
 
-        if path.is_file() {
-            save_files.push(GameSaveFile {
-                path,
-                staging_subdirectory: None,
-            });
-        } else {
+        if path.is_dir() {
             let name: String = dialoguer::Input::new().with_prompt("Name").interact_text()?;
 
             save_dirs.insert(
@@ -51,6 +46,11 @@ pub fn new(game_config_path: &Path) -> anyhow::Result<()> {
                     ignore: Default::default(),
                 },
             );
+        } else {
+            save_files.push(GameSaveFile {
+                path,
+                staging_subdirectory: None,
+            });
         }
     }
 
