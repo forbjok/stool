@@ -66,11 +66,17 @@ pub fn Example(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
                 flex_direction: FlexDirection::Column,
                 height: 10,
             ) {
-                #(log_entries.read().iter().map(|e| {
-                    element! {
-                        Text(content: format!("{e}"))
+                ScrollView {
+                    View(
+                        flex_direction: FlexDirection::Column,
+                    ) {
+                        #(log_entries.read().iter().map(|e| {
+                            element! {
+                                Text(content: format!("{e}"))
+                            }
+                        }))
                     }
-                }))
+                }
             }
             View(
                 border_style: BorderStyle::None,
