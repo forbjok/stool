@@ -3,6 +3,7 @@ mod config;
 mod engine;
 mod internal;
 mod tui;
+mod tui2;
 
 use anyhow::Context;
 use clap::Parser;
@@ -32,6 +33,14 @@ enum Command {
     },
     #[clap(about = "Run stool in TUI mode")]
     Tui {
+        #[clap(help = "Game name")]
+        name: String,
+
+        #[clap(long, help = "Override autobackup")]
+        autobackup: Option<bool>,
+    },
+    #[clap(about = "Run stool in TUI mode")]
+    Tui2 {
         #[clap(help = "Game name")]
         name: String,
 
@@ -79,6 +88,16 @@ fn main() -> anyhow::Result<()> {
             };
 
             command::tui(engine_args)
+        }
+        Command::Tui2 { name, autobackup } => {
+            let engine_args = EngineArgs {
+                name,
+                game_config_path,
+                data_path,
+                autobackup,
+            };
+
+            command::tui2(engine_args)
         }
         Command::Watch { name } => {
             let engine_args = EngineArgs {
