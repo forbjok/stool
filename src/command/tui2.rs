@@ -5,7 +5,7 @@ use iocraft::{ElementExt as _, element};
 use tracing::{error, info};
 
 use crate::engine::{self, EngineArgs};
-use crate::tui2::Example;
+use crate::tui2::App;
 
 pub fn tui2(engine_args: EngineArgs) -> anyhow::Result<()> {
     //let ui = TuiUiHandler::new(app_state.clone());
@@ -27,7 +27,7 @@ pub fn tui2(engine_args: EngineArgs) -> anyhow::Result<()> {
     //let engine = engine::run(engine_args, shutdown.clone(), ui)?;
 
     //crate::tui::run(engine, app_state, shutdown)?;
-    smol::block_on(element!(Example).fullscreen()).unwrap();
+    smol::block_on(element!(App).fullscreen()).unwrap();
 
     Ok(())
 }
