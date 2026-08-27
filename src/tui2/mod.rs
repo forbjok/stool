@@ -3,25 +3,14 @@
 use std::{sync::Arc, time::Duration};
 
 use iocraft::prelude::*;
-use strum::EnumCount;
 
 //pub use self::uihandler::TuiUiHandler;
 
-#[derive(Clone, Copy, PartialEq, EnumCount)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum MenuAction {
     CreateBackup,
     RestoreBackup,
     Exit,
-}
-
-impl MenuAction {
-    pub fn next(&self) -> Self {
-        match self {
-            Self::CreateBackup => Self::RestoreBackup,
-            Self::RestoreBackup => Self::Exit,
-            Self::Exit => Self::CreateBackup,
-        }
-    }
 }
 
 struct MenuChoice<T> {
