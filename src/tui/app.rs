@@ -7,7 +7,10 @@ use std::{
     time::Duration,
 };
 
-use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use ratatui::crossterm::{
+    self,
+    event::{Event, KeyCode, KeyEvent, KeyEventKind},
+};
 use ratatui::{
     DefaultTerminal,
     layout::{Constraint, Layout},
@@ -31,7 +34,8 @@ use super::{
     },
 };
 
-const EVENT_POLL_DURATION: Duration = Duration::from_millis(100);
+const IDLE_EVENT_POLL_DURATION: Duration = Duration::from_secs(1);
+const ACTIVE_EVENT_POLL_DURATION: Duration = Duration::from_millis(100);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum View {
@@ -116,9 +120,13 @@ impl App<'_> {
 
             terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
 
-            if ratatui::crossterm::event::poll(EVENT_POLL_DURATION)? {
-                self.handle_crossterm_events()?;
+            let poll_duration = if self.state.lock().unwrap().current_action.is_some() {
+                ACTIVE_EVENT_POLL_DURATION
+            } else {
+                IDLE_EVENT_POLL_DURATION
             };
+
+            self.handle_crossterm_events(poll_duration)?;
         }
 
         // Wait for engine thread to finish
@@ -128,12 +136,12 @@ impl App<'_> {
     }
 
     /// Reads the crossterm events and updates the state of [`App`].
-    fn handle_crossterm_events(&mut self) -> anyhow::Result<()> {
-        if !event::poll(EVENT_POLL_DURATION)? {
+    fn handle_crossterm_events(&mut self, poll_duration: Duration) -> anyhow::Result<()> {
+        if !crossterm::event::poll(poll_duration)? {
             return Ok(());
         }
 
-        match event::read()? {
+        match crossterm::event::read()? {
             // it's important to check KeyEventKind::Press to avoid handling key release events
             Event::Key(key) if key.kind == KeyEventKind::Press => self.on_key_event(key)?,
             Event::Mouse(_) => {}
