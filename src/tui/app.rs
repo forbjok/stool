@@ -142,7 +142,7 @@ impl App<'_> {
         }
 
         match crossterm::event::read()? {
-            // it's important to check KeyEventKind::Press to avoid handling key release events
+            // It's important to check KeyEventKind::Press to avoid handling key release events
             Event::Key(key) if key.kind == KeyEventKind::Press => self.on_key_event(key)?,
             Event::Mouse(_) => {}
             Event::Resize(_, _) => {}
@@ -190,7 +190,6 @@ impl App<'_> {
         }
 
         match (key.modifiers, key.code) {
-            (_, KeyCode::Char('q')) => self.quit(),
             // F12 to toggle Autobackup
             (_, KeyCode::F(12)) => {
                 let control = self.engine.control();
