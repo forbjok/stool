@@ -91,12 +91,18 @@ pub fn App(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
             width,
             height,
             background_color: Color::DarkGrey,
-            border_style: BorderStyle::None,
-            border_color: Color::Blue,
             flex_direction: FlexDirection::Column,
             align_items: AlignItems::Stretch,
             justify_content: JustifyContent::Start,
         ) {
+            // Header
+            View(
+                background_color: Color::Blue,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+            ) {
+                Text(content: "S-Tool")
+            }
             // Menu
             View(
                 border_style: BorderStyle::Round,
