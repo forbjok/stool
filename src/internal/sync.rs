@@ -77,30 +77,41 @@ impl SyncDir {
 
         ui.begin_scan();
 
-        let entries = walkdir::WalkDir::new(&path).into_iter().filter_map(Result::ok);
+        let mut entries = walkdir::WalkDir::new(&path).into_iter();
+        while let Some(entry) = entries.next() {
+            let entry = match entry {
+                Ok(v) => v,
+                Err(err) => {
+                    error!("{err}");
 
-        for entry in entries {
+                    continue;
+                }
+            };
+
             let is_dir = entry.file_type().is_dir();
-            let rel_path = entry.into_path().strip_prefix(&path)?.to_path_buf();
-
-            if is_dir {
-                dirs.insert(rel_path);
-                continue;
-            }
+            let rel_path = entry.path().strip_prefix(&path)?;
 
             if let Some(include_globset) = include_globset
-                && !include_globset.is_match(&rel_path)
+                && !include_globset.is_match(rel_path)
             {
                 continue;
             }
 
             if let Some(ignore_globset) = ignore_globset
-                && ignore_globset.is_match(&rel_path)
+                && ignore_globset.is_match(rel_path)
             {
+                if is_dir {
+                    entries.skip_current_dir();
+                }
+
                 continue;
             }
 
-            files.insert(rel_path);
+            if is_dir {
+                dirs.insert(rel_path.to_path_buf());
+            } else {
+                files.insert(rel_path.to_path_buf());
+            }
         }
 
         ui.end_scan();
