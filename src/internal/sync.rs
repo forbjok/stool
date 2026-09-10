@@ -110,6 +110,13 @@ impl SyncDir {
             if is_dir {
                 dirs.insert(rel_path.to_path_buf());
             } else {
+                // Ensure that the file's parent directory is created
+                if let Some(parent_dir_rel_path) = rel_path.parent()
+                    && !dirs.contains(parent_dir_rel_path)
+                {
+                    dirs.insert(parent_dir_rel_path.to_path_buf());
+                }
+
                 files.insert(rel_path.to_path_buf());
             }
         }
