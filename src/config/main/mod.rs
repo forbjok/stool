@@ -7,6 +7,8 @@ use anyhow::Context;
 use serde_derive::{Deserialize, Serialize};
 use tracing::error;
 
+use super::expand_vars;
+
 pub const CONFIG_DIR_NAME: &str = "stool";
 pub const CONFIG_FILENAME: &str = "config.toml";
 
@@ -73,7 +75,11 @@ impl FromStr for MainConfig {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let config: Self = toml::from_str(s).context("Error parsing config")?;
+        let mut config: Self = toml::from_str(s).context("Error parsing config")?;
+
+        if let Some(path) = expand_vars(&config.data_path)? {
+            config.data_path = path;
+        }
 
         Ok(config)
     }

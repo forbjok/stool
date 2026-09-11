@@ -7,6 +7,8 @@ use std::str::FromStr;
 use anyhow::Context;
 use serde_derive::{Deserialize, Serialize};
 
+use super::expand_vars;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct GameSaveDir {
@@ -73,7 +75,25 @@ impl FromStr for GameConfig {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let config: Self = toml::from_str(s).context("Error parsing config")?;
+        let mut config: Self = toml::from_str(s).context("Error parsing config")?;
+
+        if let Some(path) = config.copy_latest_to_path.as_ref()
+            && let Some(path) = expand_vars(path)?
+        {
+            config.copy_latest_to_path = Some(path);
+        }
+
+        for sd in config.save_dirs.values_mut() {
+            if let Some(path) = expand_vars(&sd.path)? {
+                sd.path = path;
+            }
+        }
+
+        for sf in config.save_files.iter_mut() {
+            if let Some(path) = expand_vars(&sf.path)? {
+                sf.path = path;
+            }
+        }
 
         Ok(config)
     }

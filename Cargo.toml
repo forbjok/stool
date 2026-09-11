@@ -19,6 +19,7 @@ num_enum = "0.7.6"
 ratatui = "0.30.2"
 serde = "1.0.229"
 serde_derive = "1.0.229"
+subst = "0.3.8"
 sysinfo = { version = "0.39.6", default-features = false, features = ["system"] }
 thiserror = "2.0.20"
 time = { version = "0.3.55", features = ["formatting", "local-offset", "macros"] }
