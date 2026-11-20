@@ -1,12 +1,11 @@
 use std::{
     collections::HashSet,
-    fs,
+    fs::{self, File},
     io::ErrorKind,
     path::{Path, PathBuf},
 };
 
 use anyhow::Context;
-use filetime::FileTime;
 use tracing::error;
 
 use crate::internal::hash::hash_crc32;
@@ -184,8 +183,8 @@ impl SyncDir {
                     break 'diff;
                 }
 
-                let src_modified = FileTime::from_last_modification_time(&src_metadata);
-                let dst_modified = FileTime::from_last_modification_time(&dst_metadata);
+                let src_modified = src_metadata.modified()?;
+                let dst_modified = dst_metadata.modified()?;
 
                 if src_modified != dst_modified {
                     break 'diff;
@@ -254,7 +253,13 @@ impl SyncJob {
                         return Err(SyncJobError::ReadError { path });
                     };
 
-                    let src_modified = FileTime::from_last_modification_time(&src_metadata);
+                    let Ok(src_modified) = src_metadata.modified() else {
+                        error!(
+                            "Could not modified timestamp for source file: {}",
+                            src_file_path.display()
+                        );
+                        return Err(SyncJobError::ReadError { path });
+                    };
 
                     let size = src_metadata.len();
                     ui.begin_file("Copy", &path.to_string_lossy(), size);
@@ -270,8 +275,13 @@ impl SyncJob {
 
                     ui.file_progress(size);
 
-                    filetime::set_file_mtime(&dst_file_path, src_modified)
+                    let times = fs::FileTimes::new().set_modified(src_modified);
+                    let file = File::options()
+                        .write(true)
+                        .open(&dst_file_path)
                         .map_err(|e| SyncJobError::Anyhow(e.into()))?;
+
+                    file.set_times(times).map_err(|e| SyncJobError::Anyhow(e.into()))?;
 
                     ui.end_file();
                 }
@@ -399,8 +409,8 @@ pub fn sync_file(src_file_path: &Path, dst: &Path, ui: &mut dyn SyncUiHandler) -
                     break 'diff;
                 }
 
-                let src_modified = FileTime::from_last_modification_time(&src_metadata);
-                let dst_modified = FileTime::from_last_modification_time(&dst_metadata);
+                let src_modified = src_metadata.modified()?;
+                let dst_modified = dst_metadata.modified()?;
 
                 if src_modified != dst_modified {
                     break 'diff;
