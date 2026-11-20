@@ -66,7 +66,8 @@ impl Drop for PidLock {
 fn process_exists(pid: Pid) -> bool {
     use sysinfo::{RefreshKind, System};
 
-    let sys = System::new_with_specifics(RefreshKind::nothing().with_processes(ProcessRefreshKind::everything()));
+    let sys = System::new_with_specifics(RefreshKind::nothing().with_processes(ProcessRefreshKind::nothing()))
+        .expect("Error getting process information for PID-lock check");
 
     sys.process(pid).is_some()
 }
