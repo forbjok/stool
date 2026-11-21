@@ -14,30 +14,30 @@ jobs:
     strategy:
       matrix:
         build:
-        - stable
-        - nightly
-        - windows-msvc
+          - stable
+          - nightly
+          - windows-msvc
 
         include:
-        - build: stable
-          os: ubuntu-latest
-          toolchain: stable
+          - build: stable
+            os: ubuntu-latest
+            toolchain: stable
 
-        - build: nightly
-          os: ubuntu-latest
-          toolchain: nightly
+          - build: nightly
+            os: ubuntu-latest
+            toolchain: nightly
 
-        - build: windows-msvc
-          os: windows-latest
-          toolchain: stable
+          - build: windows-msvc
+            os: windows-latest
+            toolchain: stable
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        toolchain: ${{ matrix.toolchain }}
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
 
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Run tests
+        run: cargo test --verbose
