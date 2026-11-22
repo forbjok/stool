@@ -12,8 +12,8 @@ crc32fast = "1.5.5"
 ctrlc = { version = "3.5.3", features = ["termination"] }
 dialoguer = "0.12.0"
 dirs = "7.0.0"
-globset = "0.4.21"
-notify = "8.2.2"
+globset = "0.4.22"
+notify = "9.0.0"
 num_enum = "0.7.6"
 ratatui = "0.30.2"
 serde = "1.0.229"
@@ -22,9 +22,9 @@ subst = "0.3.8"
 sysinfo = { version = "0.40.4", default-features = false, features = ["system"] }
 thiserror = "2.0.21"
 time = { version = "0.3.55", features = ["formatting", "local-offset", "macros"] }
-toml = "1.2.1"
+toml = "1.2.2"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 tui-prompts = "0.6.8"
 tui-logger = { version = "0.18.3", default-features = false, features = ["tracing-support"] }
-walkdir = "2.5.0"
+walkdir = "2.5.1"
