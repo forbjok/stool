@@ -14,7 +14,7 @@ use std::{
 };
 
 use anyhow::Context;
-use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Config, PathOp, RecommendedWatcher, Watcher};
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use time::{OffsetDateTime, format_description::BorrowedFormatItem, macros::format_description};
 use tracing::{error, info, warn};
@@ -536,15 +536,20 @@ pub fn run(args: EngineArgs, shutdown: Arc<AtomicBool>, mut ui: impl StoolUiHand
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
+        let mut save_pathops = Vec::with_capacity(save_dirs.len() + save_files.len());
+
         // Watch save directories
         for gsp in save_dirs.iter() {
-            watcher.watch(&gsp.path, RecursiveMode::Recursive)?;
+            save_pathops.push(PathOp::watch_recursive(&gsp.path));
         }
 
         // Watch save files
         for gsf_path in save_files.iter() {
-            watcher.watch(gsf_path, RecursiveMode::NonRecursive)?;
+            save_pathops.push(PathOp::watch_non_recursive(gsf_path));
         }
+
+        // Update watcher with save paths
+        watcher.update_paths(save_pathops)?;
 
         let save_dirs: Vec<_> = save_dirs
             .into_iter()
